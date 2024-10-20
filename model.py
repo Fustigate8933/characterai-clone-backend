@@ -1,7 +1,7 @@
-from transformers import GPT2LMHeadModel, AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model = GPT2LMHeadModel.from_pretrained("gpt2", load_in_8bit=True, device_map="auto")
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
+model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
 
 history = {}
 
@@ -21,4 +21,3 @@ async def llm_generate(prompt: str, user_id: str):
     history[user_id] += response + "\n"
     
     return {"response": response}
-

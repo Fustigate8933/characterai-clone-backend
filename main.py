@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from model import llm_generate
+from model import llm_generate 
 
 app = FastAPI()
 
@@ -35,3 +35,6 @@ async def generate_message(msg: Message):
 #             await websocket.send_text(response)
 #     except:
 #         print(f"WebSocket disconnected for user {user_id}.")
+
+
+
