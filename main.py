@@ -24,14 +24,14 @@ async def generate_message(msg: Message):
     return {"response": response}
 
 
-@app.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: str):
-    await websocket.accept()
-    
-    try: 
-        while True:
-            data = await websocket.receive_text()
-            response = await llm_generate(data, user_id)
-            await websocket.send_text(response)
-    except:
-        print(f"WebSocket disconnected for user {user_id}.")
+# @app.websocket("/ws/{user_id}")
+# async def websocket_endpoint(websocket: WebSocket, user_id: str):
+#     await websocket.accept()
+#     
+#     try: 
+#         while True:
+#             data = await websocket.receive_text()
+#             response = await llm_generate(data, user_id)
+#             await websocket.send_text(response)
+#     except:
+#         print(f"WebSocket disconnected for user {user_id}.")
