@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from model import llm_generate 
+from model import generate_response
 
 app = FastAPI()
 
@@ -19,10 +19,20 @@ class Message(BaseModel):
 
 
 @app.post("/generate/")
-async def generate_message(msg: Message):
-    response = await llm_generate(msg.text, msg.user_id)
+async def generate(req: Message):
+    response = await generate_response(req.text)
     return {"response": response}
 
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            response = generate_response(data)
+            await websocket.send_text(response)
+    except:
+        await websocket.close()
 
 # @app.websocket("/ws/{user_id}")
 # async def websocket_endpoint(websocket: WebSocket, user_id: str):

@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_name = "meta-llama/Llama-3.2-1B"
+model_name = "mistralai/Ministral-8B-Instruct-2410"
 model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 conversation_history = [
