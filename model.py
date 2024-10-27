@@ -79,7 +79,7 @@ if __name__ == "__main__":
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a specialist on a Japan related matter, including tourism spots, history, langauge, food, and more."
+                    "content": "You are a specialist on Japan related matter, including tourism spots, history, langauge, food, and more."
                 },
                 {
                     "role": "user",
