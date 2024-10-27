@@ -39,6 +39,7 @@ class LlamaAPI(ls.LitAPI):
             "top_p": request.top_p or 0.9,
             "max_new_tokens": request.max_tokens or 2048
         }
+        print(request)
         input = self.tokenizer.apply_chat_template(request.messages, add_generation_prompt=True, return_tensors="pt", tokenize=True)
         return input
 
@@ -60,3 +61,35 @@ class LlamaAPI(ls.LitAPI):
             if self.tokenizer.eos_token in output:
                 output = output.replace(self.tokenizer.eos_token, "")
             yield ChatMessage(role="assistant", content=output)
+
+
+
+if __name__ == "__main__":
+    import argparse
+    from openai import OpenAI
+
+    client = OpenAI(
+        base_url="http://0.0.0.0:8000/v1",
+        api_key="pig"
+    )
+
+    def get_response(message):
+        stream = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ],
+            max_tokens=512,
+            stream=True
+        )
+        for chunk in stream:
+            print(chunk.choices[0].delta.content or '', flush=True, end="")
+
+    parser = argparse.ArgumentParser("Chat with Llama")
+    parser.add_argument("text", help="Your message to Llama")
+    args = parser.parse_args()
+    
+    get_response(args.text)
