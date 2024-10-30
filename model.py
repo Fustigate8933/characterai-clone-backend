@@ -9,6 +9,7 @@ from transformers import (
     AutoTokenizer
 )
 import torch
+import TTS.api import TTS
 
 
 class LlamaAPI(ls.LitAPI):
@@ -39,7 +40,6 @@ class LlamaAPI(ls.LitAPI):
             "top_p": request.top_p or 0.9,
             "max_new_tokens": request.max_tokens or 2048
         }
-        # print(request)
         input = self.tokenizer.apply_chat_template(request.messages, add_generation_prompt=True, return_tensors="pt", tokenize=True)
         return input
 
@@ -62,6 +62,19 @@ class LlamaAPI(ls.LitAPI):
                 output = output.replace(self.tokenizer.eos_token, "")
             yield ChatMessage(role="assistant", content=output)
 
+
+class TTSAPI(ls.LitAPI):
+    def setup(self, device):
+        pass
+
+    def decode_request(self, request, context: dict):
+        pass
+
+    def predict(self, inptus, context: dict):
+        pass
+
+    def encode_request(self, outputs, context: dict):
+        pass
 
 
 if __name__ == "__main__":
