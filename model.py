@@ -9,7 +9,7 @@ from transformers import (
     AutoTokenizer
 )
 import torch
-import TTS.api import TTS
+from TTS.api import TTS
 
 
 class LlamaAPI(ls.LitAPI):
@@ -45,7 +45,7 @@ class LlamaAPI(ls.LitAPI):
 
     def predict(self, inputs, context: dict):
         model_kwargs = {
-            "input_ids": inputs,
+            "input_ids": inputs.to(self.device),
             "streamer": self.streamer,
             "eos_token_id": self.tokenizer.eos_token_id,
             **context["model_args"]
@@ -63,18 +63,18 @@ class LlamaAPI(ls.LitAPI):
             yield ChatMessage(role="assistant", content=output)
 
 
-class TTSAPI(ls.LitAPI):
-    def setup(self, device):
-        pass
-
-    def decode_request(self, request, context: dict):
-        pass
-
-    def predict(self, inptus, context: dict):
-        pass
-
-    def encode_request(self, outputs, context: dict):
-        pass
+# class TTSAPI(ls.LitAPI):
+#     def setup(self, device):
+#         pass
+#
+#     def decode_request(self, request, context: dict):
+#         pass
+#
+#     def predict(self, inptus, context: dict):
+#         pass
+#
+#     def encode_request(self, outputs, context: dict):
+#         pass
 
 
 if __name__ == "__main__":
