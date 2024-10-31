@@ -10,6 +10,9 @@ from transformers import (
 )
 import torch
 from TTS.api import TTS
+import numpy as np
+import scipy
+import io
 
 
 class LlamaAPI(ls.LitAPI):
@@ -63,18 +66,34 @@ class LlamaAPI(ls.LitAPI):
             yield ChatMessage(role="assistant", content=output)
 
 
-# class TTSAPI(ls.LitAPI):
-#     def setup(self, device):
-#         pass
-#
-#     def decode_request(self, request, context: dict):
-#         pass
-#
-#     def predict(self, inptus, context: dict):
-#         pass
-#
-#     def encode_request(self, outputs, context: dict):
-#         pass
+class TTSAPI(ls.LitAPI):
+    def setup(self, device):
+        self.device = device
+        tts = TTS("tts_models/en/vctk/vits").to(device)
+
+    def decode_request(self, request, context: dict):
+        # context["text"] = request.get("text")
+        # context["speaker_wav"] = "aizen.wav"
+        # context["language"] = "ja"
+        context["text"] = request.get("text")
+        context["speaker"] = "243"
+        return context
+
+    def predict(self, inptus, context: dict):
+        text = context["text"]
+        speaker = context["speaker"]
+
+        wav = self.tts.tts(text=text, speaker=speaker)
+        wav = np.int16(wav / np.max(np.abs(wav)) * 32767)
+        sample_rate = 24000
+        byte_data = io.BytesIO()
+        scipy.io.wavfile.write(byte_data, sample_rate, wav)
+        byte_data.seek(0)
+        
+        return byte_data
+
+    def encode_request(self, outputs, context: dict):
+        return outputs
 
 
 if __name__ == "__main__":
