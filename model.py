@@ -69,7 +69,7 @@ class LlamaAPI(ls.LitAPI):
 class TTSAPI(ls.LitAPI):
     def setup(self, device):
         self.device = device
-        tts = TTS("tts_models/en/vctk/vits").to(device)
+        self.tts = TTS("tts_models/en/vctk/vits").to(device)
 
     def decode_request(self, request, context: dict):
         # context["text"] = request.get("text")
@@ -77,7 +77,7 @@ class TTSAPI(ls.LitAPI):
         # context["language"] = "ja"
         context["text"] = request.get("text")
         context["speaker"] = "243"
-        return context
+        yield context
 
     def predict(self, inptus, context: dict):
         text = context["text"]
@@ -90,66 +90,8 @@ class TTSAPI(ls.LitAPI):
         scipy.io.wavfile.write(byte_data, sample_rate, wav)
         byte_data.seek(0)
         
-        return byte_data
+        yield byte_data
 
     def encode_request(self, outputs, context: dict):
         return outputs
 
-
-if __name__ == "__main__":
-    import argparse
-    from openai import OpenAI
-
-    client = OpenAI(
-        base_url="http://0.0.0.0:8000/v1",
-        api_key="stoopid"
-    )
-
-    def get_response(message):
-        stream = client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a specialist on Japan related matter, including tourism spots, history, langauge, food, and more."
-                },
-                {
-                    "role": "user",
-                    "content": "Can you give me some examples of Japanese omatsuri?"
-                },
-                {
-                    "role": "assistant",
-                    "content": """
-                        1. **Gion Matsuri** (July 17th, Kyoto): A colorful festival to honor the gods and ward off evil spirits. It features traditional music, dances, and parades.
-                        2. **Sanja Matsuri** (May 15th, Tokyo): A lively festival at the Asakusa Shrine, where priests carry portable shrines and perform traditional dances.
-                        3. **Star Festival (Tanabata Matsuri)** (July 7th, Sendai): A beautiful festival inspired by the Chinese legend of two star-crossed lovers. It features lanterns, poems, and traditional sweets.
-                        4. **Miyajima Matsuri** (August 25th, Hiroshima): A festival on Miyajima Island, where people carry shrines and perform rituals to honor the god of the sea.
-                        These are just a few examples of the many omatsuri celebrations held throughout Japan. Each festival has its unique characteristics, traditions, and cultural significance, making them an integral part of Japanese culture and society.%
-                    """
-                },
-                {
-                    "role": "user",
-                    "content": "Can you elaborate in one paragraph about the 3rd one you have mentioned?"
-                },
-                {
-                    "role": "assistant",
-                    "content": """
-                    The Star Festival, also known as Tanabata Matsuri, is a magical and romantic celebration inspired by the ancient Chinese legend of two star-crossed lovers, Orihime and Hikoboshi. According to the myth, the lovers were separated by the Milky Way and could only meet once a year on the seventh day of the seventh month, which falls on July 7th in the lunar calendar. In Japan, this festival is celebrated on July 7th or around that date, with festivities typically held in the evening. People write wishes and poems on tanzaku papers and tie them to bamboo trees, while thousands of colorful paper lanterns are hung to represent the stars in the sky. The atmosphere is filled with music, dancing, and the scent of traditional sweets, creating a whimsical and enchanting experience that is a must-see for anyone visiting Japan during this time.%
-                    """
-                },
-                {
-                    "role": "user",
-                    "content": message
-                }
-            ],
-            max_tokens=512,
-            stream=True
-        )
-        for chunk in stream:
-            print(chunk.choices[0].delta.content or '', flush=True, end="")
-
-    parser = argparse.ArgumentParser("Chat with Llama")
-    parser.add_argument("text", help="Your message to Llama")
-    args = parser.parse_args()
-
-    get_response(args.text)
