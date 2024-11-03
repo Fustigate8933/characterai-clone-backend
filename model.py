@@ -10,9 +10,8 @@ from transformers import (
 )
 import torch
 from TTS.api import TTS
-import numpy as np
-import scipy
-import io
+import soundfile as sf
+import io, base64
 
 
 class LlamaAPI(ls.LitAPI):
@@ -72,26 +71,25 @@ class TTSAPI(ls.LitAPI):
         self.tts = TTS("tts_models/en/vctk/vits").to(device)
 
     def decode_request(self, request, context: dict):
-        # context["text"] = request.get("text")
-        # context["speaker_wav"] = "aizen.wav"
-        # context["language"] = "ja"
-        context["text"] = request.get("text")
-        context["speaker"] = "243"
-        yield context
-
-    def predict(self, inptus, context: dict):
-        text = context["text"]
-        speaker = context["speaker"]
+        return request["text"]
+        
+    def predict(self, text):
+        speaker = "p243"
 
         wav = self.tts.tts(text=text, speaker=speaker)
-        wav = np.int16(wav / np.max(np.abs(wav)) * 32767)
-        sample_rate = 24000
-        byte_data = io.BytesIO()
-        scipy.io.wavfile.write(byte_data, sample_rate, wav)
-        byte_data.seek(0)
-        
-        yield byte_data
 
-    def encode_request(self, outputs, context: dict):
-        return outputs
+        if isinstance(wav, torch.Tensor):
+            wav = wav.numpy()
+
+        audio_buffer = io.BytesIO()
+        sf.write(audio_buffer, wav, samplerate=24000, format='WAV')
+        audio_buffer.seek(0)
+        audio_data = audio_buffer.getvalue()
+        audio_buffer.close()
+        
+        return {"audio_content": audio_data}
+
+    def encode_response(self, prediction):
+        audio_content_base64 = base64.b64encode(prediction["audio_content"]).decode("utf-8")
+        return {"audio_content": audio_content_base64, "content_type": "audio/wav"}
 
