@@ -69,14 +69,16 @@ class TTSAPI(ls.LitAPI):
     def setup(self, device):
         self.device = device
         self.tts = TTS("tts_models/en/vctk/vits").to(device)
+        # self.tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
 
     def decode_request(self, request, context: dict):
         return request["text"]
         
     def predict(self, text):
-        speaker = "p243"
-
+        speaker = "p230"
         wav = self.tts.tts(text=text, speaker=speaker)
+
+        # wav = self.tts.tts(text=text, speaker_wav="frieren_clip.wav", language="en")
 
         if isinstance(wav, torch.Tensor):
             wav = wav.numpy()
